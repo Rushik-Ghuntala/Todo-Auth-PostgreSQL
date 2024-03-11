@@ -19,9 +19,13 @@ const PORT = process.env.PORT ?? 4000;
 app.use(express.json());
 
 
+
+
 AppDataSource.initialize()
-    .then(() => {
+    .then(async () => {
         console.log("Database ka connection successfully...")
+
+        
 
         // define routes and mount
         app.use('/app/v1', router)

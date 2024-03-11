@@ -1,14 +1,25 @@
+// src/seeding/user.seed.ts
+
 import { User } from "../entities/user.entities";
 import { AppDataSource } from "../config/database";
 
-export const seedUserTable = async () => {
-    const userRepository = AppDataSource.getRepository(User);
+async function seedUserTable() {
+    try {
+        await AppDataSource.initialize(); // Ensure TypeORM is initialized
 
-    // Insert sample user data
-    await userRepository.save([
-        { name: "John Doe", email: "john@example.com", password: "password123" },
-        { name: "Jane Smith", email: "jane@example.com", password: "password456" }
-    ]);
+        const userRepository = AppDataSource.getRepository(User);
 
-    console.log("User table seeded successfully!");
-};
+        await userRepository.save([
+            { name: "John Doe", email: "john@example.com", password: "password123" },
+            { name: "Jane Smith", email: "jane@example.com", password: "password456" }
+        ]);
+
+        console.log("User table seeded successfully!");
+    } catch (error) {
+        console.error("Error seeding user table:", error);
+    } finally {
+        await AppDataSource.destroy(); // Close the database connection
+    }
+}
+
+seedUserTable();
