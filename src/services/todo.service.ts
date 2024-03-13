@@ -5,13 +5,17 @@ import { AppDataSource } from "../config/database";
 import { Todo } from "../entities/todo.entities";
 import { User } from "../entities/user.entities";
 
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:3000');
+
 export const createTodo = async(req: Request, res: Response) => {
     try {
         const payload: JwtPayload = jwt.verify(req.cookies.token, process.env.JWT_SECRET as string) as JwtPayload;
         console.log("Todo ma chhu aa le payload: ", payload);
 
         const currentUserId = payload.id;
-        console.log(currentUserId);
+        // console.log(currentUserId);
         
         // Data fetch
         const { title, description } = req.body;
@@ -35,6 +39,8 @@ export const createTodo = async(req: Request, res: Response) => {
             // Push new todo to the user's todos array
             existingUser.todos.push(newTodo);
             await userRepository.save(existingUser);
+
+            socket.emit('todoAdded', { message: 'New todo added', userId: currentUserId, todo: newTodo });
 
             return res.status(200).json({
                 success: true,
@@ -75,6 +81,8 @@ export const fetchTodo = async(req: Request, res: Response) => {
 
         console.log("todos: ", existingUser?.todos)
         const todos = existingUser?.todos;
+
+        socket.emit('todoFetch', { message: 'Todo Fetch by', userId: currentUserId });
 
         return res.status(200).json({
             success: true,
@@ -121,6 +129,8 @@ export const updateTodo = async(req: Request, res: Response) => {
             existingTodo.description = description
 
             await todoRepository.save(existingTodo);
+
+            socket.emit('todoUpdated', { message: 'Todo updated', todoId: todoId, title: title, description: description });
 
             return res.status(200).json({
                 success: true,
@@ -170,6 +180,8 @@ export const deleteTodo = async(req: Request, res: Response) => {
 
         if(existingTodo){
             await todoRepository.delete(todoId);
+
+            socket.emit('todoDeleted', { message: 'Todo deleted', todoId: todoId });
 
             return res.status(200).json({
                 success: true,

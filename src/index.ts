@@ -35,13 +35,18 @@ AppDataSource.initialize()
 
         // app listining at port
         server.listen(PORT, () => {
-            console.log(`Server Started ar ${PORT}`)
+            console.log(`Server Started at ${PORT}`)
         })
 
         //default router
         app.get('/', (req: Request, res: Response) => {
             res.send("HEllo Default routers")
         })
+
+        // Handle Socket.IO connection error
+        io.on('error', (err) => {
+            console.error("Socket.IO connection error:", err);
+        });
 
     })
     .catch((err) => {
@@ -50,7 +55,3 @@ AppDataSource.initialize()
 
 
 
-// Handle Socket.IO connection error
-io.on('error', (err) => {
-    console.error("Socket.IO connection error:", err);
-});

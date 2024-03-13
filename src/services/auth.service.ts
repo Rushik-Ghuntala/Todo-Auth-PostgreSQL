@@ -65,6 +65,8 @@ export const signup = async(req: Request, res: Response) => {
         
         // return Success("User Registered Seccessfully...", newUser);
 
+        io.emit('userSignup', { message: 'New user signed up', newUser: newUser });
+
         return res.status(200).json({
             success: true,
             data: newUser,
