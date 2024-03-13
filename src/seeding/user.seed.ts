@@ -1,4 +1,3 @@
-// src/seeding/user.seed.ts
 
 import { User } from "../entities/user.entities";
 import { AppDataSource } from "../config/database";

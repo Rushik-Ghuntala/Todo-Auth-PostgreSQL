@@ -4,13 +4,14 @@ import { AppDataSource } from "../config/database";
 import { Error, Success } from "../utils/response/response";
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import { io } from "..";
 require('dotenv').config();
 
 
 export const signup = async(req: Request, res: Response) => {
     try{
         // data fetch
-        const {name, email, password} = req.body;
+        const {name, email, password, parentOf, childOf} = req.body;
 
         // Obtain the repository for the User entity
         const userRepository = AppDataSource.getRepository(User);
@@ -45,17 +46,30 @@ export const signup = async(req: Request, res: Response) => {
             name,
             email,
             password: hashedPassword,
+            parentOf,
+            childOf,
         })
 
         const newUser = await userRepository.save(user);
 
-        return Success("User Registered Seccessfully...", newUser);
+        // // If parentOf is an array of user IDs, update each parent user
+        // if (parentOf && Array.isArray(parentOf)) {
+        //     for (const parentId of parentOf) {
+        //         const parentUser = await userRepository.findOne(parentId);
+        //         if (parentUser) {
+        //             parentUser.parentOf = [...parentUser.parentOf, newUser.id];
+        //             await userRepository.save(parentUser);
+        //         }
+        //     }
+        // }
+        
+        // return Success("User Registered Seccessfully...", newUser);
 
-        // return res.status(200).json({
-        //     success: true,
-        //     data: newUser,
-        //     message: "User created Successfully..."
-        // })
+        return res.status(200).json({
+            success: true,
+            data: newUser,
+            message: "User created Successfully..."
+        })
 
     }
     catch(err){
@@ -94,6 +108,8 @@ export const login = async(req: Request, res: Response) => {
 
         const payload = {
             email: user.email,
+            parentOf: user.parentOf,
+            childOf: user.childOf,
             id: user.id,
         };
 

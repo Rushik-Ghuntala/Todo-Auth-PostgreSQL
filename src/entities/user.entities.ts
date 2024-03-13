@@ -20,6 +20,12 @@ export class User {
     @Column()
     password: string ;
 
+    @Column({ nullable: true })
+    childOf: number;
+
+    @Column({ nullable: true })
+    parentOf: number;
+
     @Column({ nullable: true }) 
     token?: string; 
 

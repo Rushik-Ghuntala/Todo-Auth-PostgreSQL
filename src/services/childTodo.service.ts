@@ -5,19 +5,30 @@ import { AppDataSource } from "../config/database";
 import { Todo } from "../entities/todo.entities";
 import { User } from "../entities/user.entities";
 
-export const createTodo = async(req: Request, res: Response) => {
+export const childCreateTodo = async(req: Request, res: Response) => {
     try {
         const payload: JwtPayload = jwt.verify(req.cookies.token, process.env.JWT_SECRET as string) as JwtPayload;
         console.log("Todo ma chhu aa le payload: ", payload);
 
-        const currentUserId = payload.id;
+        let currentUserId = payload.id;
         console.log(currentUserId);
+
+        const childId = payload.parentOf;
+        currentUserId = childId;
+
         
         // Data fetch
         const { title, description } = req.body;
 
         // Obtain the repository for the to do entity
         const todoRepository = AppDataSource.getRepository(Todo);
+
+        if(currentUserId === 0){
+            return res.status(200).json({
+                success: false,
+                message: "You have not child..."
+            })
+        }
 
         const newTodo = todoRepository.create({
             title: title,
@@ -48,6 +59,8 @@ export const createTodo = async(req: Request, res: Response) => {
                 message: 'User not found...'
             });
         }
+
+        
     } catch(err) {
         console.error(err);
 
@@ -59,16 +72,27 @@ export const createTodo = async(req: Request, res: Response) => {
 }
 
 
-export const fetchTodo = async(req: Request, res: Response) => {
+export const childFetchTodo = async(req: Request, res: Response) => {
     try{
         const payload: JwtPayload = jwt.verify(req.cookies.token, process.env.JWT_SECRET as string) as JwtPayload;
         console.log("Todo ma chhu aa le payload: ", payload);
 
-        const currentUserId = payload.id;
+        let currentUserId = payload.id;
         console.log("currentUserId: ", currentUserId);
+
+        const childId = payload.parentOf;
+
+        currentUserId = childId;
 
         // Obtain the repository for the User Entity
         const userRepository = AppDataSource.getRepository(User);
+
+        if(currentUserId === 0){
+            return res.status(200).json({
+                success: false,
+                message: "You have not child..."
+            })
+        }
 
         // Find the user by ID
         let existingUser = await userRepository.findOne({ where: { id: currentUserId }, relations: ["todos"] });
@@ -93,17 +117,28 @@ export const fetchTodo = async(req: Request, res: Response) => {
     }
 }
 
-export const updateTodo = async(req: Request, res: Response) => {
+export const childUpdateTodo = async(req: Request, res: Response) => {
     try{
         const payload: JwtPayload = jwt.verify(req.cookies.token, process.env.JWT_SECRET as string) as JwtPayload;
         console.log("Todo ma chhu aa le payload: ", payload);
 
-        const currentUserId = payload.id;
+        let currentUserId = payload.id;
         console.log(currentUserId);
+
+        const childId = payload.parentOf;
+
+        currentUserId = childId;
 
         // Data fetch
         const todoId = parseInt(req.params.todoId);
         const { title, description } = req.body;
+
+        if(currentUserId === 0){
+            return res.status(200).json({
+                success: false,
+                message: "You have not child..."
+            })
+        }
 
         // Obtain the repository for the to do entity
         const todoRepository = AppDataSource.getRepository(Todo);
@@ -146,16 +181,28 @@ export const updateTodo = async(req: Request, res: Response) => {
     }
 }
 
-export const deleteTodo = async(req: Request, res: Response) => {
+export const childDeleteTodo = async(req: Request, res: Response) => {
     try{
         const payload: JwtPayload = jwt.verify(req.cookies.token, process.env.JWT_SECRET as string) as JwtPayload;
         console.log("Todo ma chhu aa le payload: ", payload);
 
-        const currentUserId = payload.id;
+        let currentUserId = payload.id;
         console.log(currentUserId);
+
+        const childId = payload.parentOf;
+
+        currentUserId = childId;
+
 
         // Data fetch
         const todoId = parseInt(req.params.todoId);
+
+        if(currentUserId === 0){
+            return res.status(200).json({
+                success: false,
+                message: "You have not child..."
+            })
+        }
 
         // Obtain the repository for the to do entity
         const todoRepository = AppDataSource.getRepository(Todo);

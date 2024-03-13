@@ -1,16 +1,18 @@
-import { Request, Response } from "express";
+import express, { Request, Response } from "express";
 import { AppDataSource } from "./config/database";
 import router from "./routes/index.routes";
+import http from 'http';
+import { Server } from 'socket.io';
+import { socket } from './websocket/socket'
+import cookieParser from 'cookie-parser'
 
 // import express and make app instance of express
-const express = require("express")
 const app = express();
 
 //load config from env file
 require('dotenv').config();
 
 // cookie-parser
-const cookieParser = require('cookie-parser')
 app.use(cookieParser())
 
 const PORT = process.env.PORT ?? 4000;
@@ -19,27 +21,26 @@ const PORT = process.env.PORT ?? 4000;
 app.use(express.json());
 
 
-
+const server = http.createServer(app);
+export const io = new Server(server);
 
 AppDataSource.initialize()
-    .then(async () => {
+    .then(() => {
         console.log("Database ka connection successfully...")
 
-        
+        socket();
 
         // define routes and mount
         app.use('/app/v1', router)
 
-        // app.get('/*', (req: Request, res: Response) => {
-        //     return res.status(400).json({
-        //         error: "Error..",
-        //         message: "Route not deinfed yet..."
-        //     })
-        // })
-
         // app listining at port
-        app.listen(PORT, () => {
+        server.listen(PORT, () => {
             console.log(`Server Started ar ${PORT}`)
+        })
+
+        //default router
+        app.get('/', (req: Request, res: Response) => {
+            res.send("HEllo Default routers")
         })
 
     })
@@ -49,3 +50,7 @@ AppDataSource.initialize()
 
 
 
+// Handle Socket.IO connection error
+io.on('error', (err) => {
+    console.error("Socket.IO connection error:", err);
+});
